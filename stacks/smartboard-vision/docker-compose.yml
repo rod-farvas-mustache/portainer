@@ -1,0 +1,63 @@
+version: '3.7'
+
+services:
+
+  db:
+    container_name: sbv_${ENVIRONMENT}_db
+    hostname: sbv_${ENVIRONMENT}_db
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_DATABASE: sbv_${ENVIRONMENT}_db
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    ports:
+      - 27017/tcp
+    networks:
+      - iatric
+    volumes:
+      - db_volume:/data/db
+
+  app:
+    container_name: sbv_${ENVIRONMENT}
+    hostname: sbv_${ENVIRONMENT}
+    networks:
+      - iatric
+    image: docker.iatric.com/sbv:${VERSION}-alpine
+    restart: unless-stopped
+    depends_on:
+      - db
+    ports:
+      - ${APP_PORT}:443/tcp
+    volumes:
+      - /home/iatric/certificates:/app/certificates
+      - /home/iatric/apps/sbv_${ENVIRONMENT}/watch:/app/watch
+      - /home/iatric/apps/sbv_${ENVIRONMENT}/error:/app/error
+      - /home/iatric/apps/sbv_${ENVIRONMENT}/staticFiles:/app/staticFiles
+    environment:
+      APPLICATION_API: https://sbv_${ENVIRONMENT}/api
+      APPLICATION_API_CLIENT: https://${SERVER_HOSTNAME}:${APP_PORT}/api
+      APPLICATION_NAME: Smartboard Vision [${ENVIRONMENT}]
+      APPLICATION_URL: https://${SERVER_HOSTNAME}:${APP_PORT}/
+      APPLICATION_UUID: 589e3ffe-42ef-4717-81f2-22c5c4533429
+      APPLICATIONMANAGER_API: https://fastlane_${ENVIRONMENT}/api
+      APPLICATIONMANAGER_API_CLIENT: https://${SERVER_HOSTNAME}:${FASTLANE_PORT}/api
+      DB: mongodb://sbv_${ENVIRONMENT}_db/sbv_${ENVIRONMENT}
+      ICONNECT_SITECODE: ${SITE_CODE}
+      MONGO_USER: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_USER_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      NODE_ENV: production
+      NODE_TLS_REJECT_UNAUTHORIZED: 0
+      PORT: 443
+      X_AUTH_REFRESH_TOKEN_EXPIRATION: 480
+      X_AUTH_REFRESH_TOKEN_SECRET: ${TOKEN_SECRET}
+      X_AUTH_TOKEN_EXPIRATION: 15
+      X_AUTH_TOKEN_SECRET: ${TOKEN_SECRET}
+      
+volumes:
+  db_volume:
+    name: sbv_${ENVIRONMENT}_db
+
+networks:
+  iatric:
+    external: true

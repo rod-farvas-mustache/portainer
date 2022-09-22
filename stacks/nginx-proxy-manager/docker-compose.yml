@@ -1,0 +1,26 @@
+version: "3"
+services:
+  nginx_proxy_manager:
+    container_name: nginx_proxy_manager
+    hostname: nginx_proxy_manager
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
+    networks:
+      - iatric
+    ports:
+      - '80:80'
+      - '443:443'
+      - '81:81'
+    environment:
+      DISABLE_IPV6: 'true'
+    volumes:
+      - nginx_proxy_manager_data:/data
+      - nginx_proxy_manager_letsencrypt:/etc/letsencrypt
+  
+volumes:
+  nginx_proxy_manager_data: {}
+  nginx_proxy_manager_letsencrypt: {}
+
+networks:
+  iatric:
+    external: true  
