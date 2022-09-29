@@ -4,15 +4,14 @@ version: "3"
 services:
   # --------------------------------------------------------------------------------------------
   detectrx-db:
-    container_name: detectrx_${ENVIRONMENT}_db
-    hostname: detectrx_${ENVIRONMENT}_db
-    image: docker.iatric.com/detectrx-db:latest
+    container_name: 'detectrx-db'
+    hostname: 'detectrx-db'
+    image: 'docker.iatric.com/detectrx-db:latest'
     environment:
       TZ: 'UTC'
-      MYSQL_ROOT_HOST: '%'
-      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
-      DB_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_DATABASE: detectrx_${ENVIRONMENT}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      DB_PASSWORD: ${MYSQL_DB_PASSWORD}
+      MYSQL_DATABASE: 'detectrx'
       DOCKER_HOSTNAME: 'localhost'
       DOCKER_HOSTIPADDR: '127.0.0.1'
       CLIENT_CODE: ${SITE_CODE}
@@ -30,26 +29,32 @@ services:
     restart: "always"
     networks:
       - "detectrx-subnet-local"
+    healthcheck:
+      test: ["CMD-SHELL", 'mysql --database=detectrx --password=${MYSQL_ROOT_PASSWORD} --execute="SELECT count(table_name) > 0 FROM information_schema.tables;" --skip-column-names -B']
+      interval: 60s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
   # --------------------------------------------------------------------------------------------
   solomon-db:
-    container_name: solomon_${ENVIRONMENT}_db
-    hostname: solomon_${ENVIRONMENT}_db
-    image: docker.iatric.com/solomon-db:2.1.4
+    container_name: 'solomon-db'
+    hostname: 'solomon-db'
+    image: 'docker.iatric.com/solomon-db:2.1.4'
     mem_limit: 17179869184
     command:
       - "/mnt/entrypoint.sh"
     environment:
       TZ: UTC
-      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
-      DB_PASSWORD: ${MYSQL_PASSWORD}
-      DOCKER_HOSTNAME: localhost
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      DB_PASSWORD: ${MYSQL_DB_PASSWORD}
+      DOCKER_HOSTNAME: 'localhost'
       DOCKER_HOSTIPADDR: '127.0.0.1'
       CLIENT_CODE: ${SITE_CODE}
       CLIENT_TEXT_DESCRIPTION: 'iatricSystems ${ENVIRONMENT} System'
       PATH: '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
-      TERM: xterm
+      TERM: 'xterm'
       GOSU_VERSION: '1.12'
-      MYSQL_DATABASE: 'solomon_${ENVIRONMENT}'
+      MYSQL_DATABASE: 'solomon'
       PRODUCTION: 'true'
     volumes:
       - "db-backup-solomon-local:/mnt/backup"
@@ -65,21 +70,23 @@ services:
     networks:
       - "detectrx-subnet-local"
     healthcheck:
-      test: ["CMD-SHELL", 'mysql --database=solomon_${ENVIRONMENT} --password=${MYSQL_PASSWORD} --execute="SELECT count(table_name) > 0 FROM information_schema.tables;" --skip-column-names -B']
-      interval: 30s
+      test: ["CMD-SHELL", 'mysql --database=solomon --password=${MYSQL_ROOT_PASSWORD} --execute="SELECT count(table_name) > 0 FROM information_schema.tables;" --skip-column-names -B']
+      interval: 60s
       timeout: 10s
       retries: 10
+      start_period: 60s
   # --------------------------------------------------------------------------------------------
   detectrx-solomon:
-    container_name: detectrx-solomon_${ENVIRONMENT}
+    container_name: 'detectrx-solomon'
+    hostname: 'solomon-drug-div'
     image: "docker.iatric.com/detectrx-solomon:${IMAGE_TAG}"
     mem_limit: 17179869184
     environment:
-        TZ: UTC
-        DRUG_DIV_DB_PASSWORD: ${MYSQL_PASSWORD}
-        DRUG_DIV_DB_SERVER: detectrx_${ENVIRONMENT}_db
-        DRUG_DIV_DATABASE: detectrx_${ENVIRONMENT}
-        DRUG_DIV_DB_USER: root
+        TZ: 'UTC'
+        DRUG_DIV_DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+        DRUG_DIV_DB_SERVER: '10.1.1.1'
+        DRUG_DIV_DATABASE: 'detectrx'
+        DRUG_DIV_DB_USER: 'root'
         DRUG_DIV_RUN_LOAD: 'True'
         DRUG_DIV_LOAD_IMPORT_PATH: '/mnt/dataloadfiles/'
         DRUG_DIV_LOAD_LOG_PATH: '/mnt/log/drug_div_proc/data_load/'
@@ -91,18 +98,18 @@ services:
         _JAVA_OPTIONS: '-Xmx49152M'
         FASTLANE_BASE_URL: 'https://${HOST_FQDN}:44400'
         FASTLANE_USERNAME: 'ava.user'
-        FASTLANE_PASSWORD: ${MYSQL_PASSWORD}
+        FASTLANE_PASSWORD: ${FASTLANE_PASSWORD}
         APPLICATION_API: 'https://fastlane:44400'
         APPLICATIONMANAGER_API: 'https://${HOST_FQDN}:44400'
         DOCKER_HOSTNAME: localhost
-        DOCKER_HOSTIPADDR: 127.0.0.1
-        SOLOMON_DB_USERNAME: root
-        SOLOMON_DB_PASSWORD: ${MYSQL_PASSWORD}
-        SOLOMON_DB_NAME: solomon_${ENVIRONMENT}
-        SOLOMON_DB_HOSTNAME: solomon_${ENVIRONMENT}_db
-        SOLOMON_DB_DIALECT: mysql
-        SPARK_LOCAL_HOSTNAME: localhost
-        DRUG_DIV_DB_HOSTNAME: detectrx_${ENVIRONMENT}_db
+        DOCKER_HOSTIPADDR: '127.0.0.1'
+        SOLOMON_DB_USERNAME: 'root'
+        SOLOMON_DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+        SOLOMON_DB_NAME: 'solomon'
+        SOLOMON_DB_HOSTNAME: 'solomon-db'
+        SOLOMON_DB_DIALECT: 'mysql'
+        SPARK_LOCAL_HOSTNAME: 'localhost'
+        DRUG_DIV_DB_HOSTNAME: 'detectrx-db'
         PATH: '/usr/lib/spark-3.0.1-bin-hadoop2.7/bin/:/usr/lib/spark-3.0.1-bin-hadoop2.7/bin/:/usr/lib/spark-3.0.1-bin-hadoop2.7/sbin/:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
         TERM: xterm
         SPARK_VERSION: 3.0.1
@@ -112,11 +119,13 @@ services:
         JAVA_HOME: '/usr/lib/jvm/java-1.8.0-openjdk-amd64'
         PRODUCTION: 
         SFTP_PASSWORD: ${SFTP_PASSWORD}
-        DRUG_DIV_DB_PORT: 3306
-        SCRIPT_INSIDE_DOCKER: 1
+        DRUG_DIV_DB_PORT: '3306'
+        SCRIPT_INSIDE_DOCKER: '1'
     privileged: true
     depends_on:
       solomon-db:
+        condition: service_healthy
+      detectrx-db:
         condition: service_healthy
     volumes:
       - "all-logs-local:/mnt/log"
@@ -125,7 +134,6 @@ services:
       - "config-ini-volume-local:/mnt/config"
       - "./config:/mnt/src/solomon/core/solomon/de_config/configurations"
     working_dir: "/mnt/src/drug_div"
-    hostname: "solomon-drug-div_${ENVIRONMENT}"
     ports:
       - "18081:18080"
       - "3500:3501"
@@ -138,7 +146,8 @@ services:
       - "detectrx-subnet-local"
   # --------------------------------------------------------------------------------------------
   detectrx-sftp:
-    container_name: detectrx-sftp_${ENVIRONMENT}
+    container_name: 'sftp-host'
+    hostname: 'sftp-host'
     image: "docker.iatric.com/detectrx-sftp:${IMAGE_TAG}"
     command:
       - "/entrypoint"
@@ -149,7 +158,6 @@ services:
       - "TERM=xterm"
     volumes:
       - "sftp-files-local:/iat/upload"
-    hostname: "sftp-host_${ENVIRONMENT}"
     ports:
       - "2222:22"
     logging:
@@ -159,27 +167,30 @@ services:
       - "detectrx-subnet-local"
   # --------------------------------------------------------------------------------------------
   detectrx-nginx:
-    container_name: detectrx-nginx_${ENVIRONMENT}
+    container_name: 'detectrx-nginx'
+    hostname: 'detectrx-nginx'
     image: "docker.iatric.com/detectrx-nginx:${IMAGE_TAG}"
-    hostname: "detectrx-nginx_${ENVIRONMENT}"
     ports:
       - "3443:443"
     restart: "always"
     depends_on:
       - "metabase"
-      - "detectrx-ava-client"
-      - "fastlane"
     environment:
         NGINX_HOST: ${HOST_FQDN}
         NGINX_INSTANCE: ${NGINX_INSTANCE}
-    volumes:
-      - "/home/iatric/detectrx/nginx-local:/etc/nginx/www"
     command: /bin/sh -c "envsubst < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf && exec nginx -g 'daemon off;'"
     networks:
       - "detectrx-subnet-local"
+    healthcheck:
+     test: "curl --insecure -f https://localhost/index.html || exit 1"
+     interval: 60s
+     timeout: 10s
+     retries: 10
+     start_period: 60s
   # --------------------------------------------------------------------------------------------
   metabase:
-    container_name: metabase_${ENVIRONMENT}
+    container_name: 'metabase'
+    hostname: 'metabase'
     image: "registry.hub.docker.com/metabase/metabase:v0.41.7"
     environment:
       - "MD_DB_FILE=/home/metabase/metabase.db"
@@ -187,13 +198,19 @@ services:
       - "3000:3000"
     volumes:
       - "metabase-files-local:/metabase.db"
-    hostname: "metabase_${ENVIRONMENT}"
     restart: "always"
     networks:
       - "detectrx-subnet-local"
+    healthcheck:
+      test: ["CMD", "nc", "-z", "-v", "localhost", "3000"]
+      interval: 60s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
   # --------------------------------------------------------------------------------------------
   detectrx-client:
-    container_name: detectrx-client_${ENVIRONMENT}
+    container_name: 'detectrx-client'
+    hostname: 'detectrx-client'
     image: "docker.iatric.com/detectrx-client:${IMAGE_TAG}"
     dns:
       - 192.168.0.9
@@ -201,45 +218,56 @@ services:
     ports:
       - "3001:3001"
     environment:
-        NODE_ENV: ${ENVIRONMENT}
-        NODE_TLS_REJECT_UNAUTHORIZED: 0
-        APPLICATION_UUID: e65fa53d-c954-43f5-8c2c-a08456f11829
-        APPLICATION_API: https://${HOST_FQDN}:3001/api
-        APPLICATION_NAME: DRUGDIVERSION
-        APPLICATION_URL: https://${HOST_FQDN}:3001/
-        APPLICATIONMANAGER_API: https://fastlane:44400/api
-        APPLICATIONMANAGER_API_CLIENT: https://${HOST_FQDN}:44400/api
-        DB_DIALECT: mysql
-        DB_HOSTNAME: detectrx_${ENVIRONMENT}_db
-        DB_LOGGING: 0
-        DB_NAME: detectrx_${ENVIRONMENT}
-        DB_PASSWORD: ${MYSQL_PASSWORD}
-        DB_PORT: 3306
-        DB_USERNAME: root
+        NODE_ENV: 'development'
+        NODE_TLS_REJECT_UNAUTHORIZED: '0'
+        APPLICATION_UUID: 'e65fa53d-c954-43f5-8c2c-a08456f11829'
+        APPLICATION_API: 'https://${HOST_FQDN}:3001/api'
+        APPLICATION_NAME: 'DRUGDIVERSION'
+        APPLICATION_URL: 'https://${HOST_FQDN}:3001/'
+        APPLICATIONMANAGER_API: 'https://fastlane:44400/api'
+        APPLICATIONMANAGER_API_CLIENT: 'https://${HOST_FQDN}:44400/api'
+        DB_DIALECT: 'mysql'
+        DB_HOSTNAME: 'detectrx-db'
+        DB_LOGGING: '0'
+        DB_NAME: 'detectrx'
+        DB_PASSWORD: '${MYSQL_ROOT_PASSWORD}'
+        DB_PORT: '3306'
+        DB_USERNAME: 'root'
         X_AUTH_TOKEN_SECRET: ${TOKEN_SECRET}
-        X_AUTH_TOKEN_EXPIRATION: 15
+        X_AUTH_TOKEN_EXPIRATION: '15'
         X_AUTH_REFRESH_TOKEN_SECRET: ${TOKEN_SECRET}
-        X_AUTH_RERESH_TOKEN_EXPIRATION: 480
+        X_AUTH_RERESH_TOKEN_EXPIRATION: '480'
     restart: "always"
     volumes:
       - "dataloadfiles-local:/mnt/dataloadfiles" # We want to be able to look at the solomon-drug-div import errors and ddhold files
-    depends_on:
-      - "detectrx-db"
-      - "fastlane"
     networks:
       - "detectrx-subnet-local"
+    depends_on:
+      solomon-db:
+        condition: service_healthy
+      detectrx-db:
+        condition: service_healthy
+      fastlane:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "nc", "-z", "-v", "localhost", "3001"]
+      interval: 60s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
   # --------------------------------------------------------------------------------------------
   detectrx-ava-client:
-    container_name: detectrx-ava-client_${ENVIRONMENT}
+    container_name: 'detectrx-ava-client'
+    hostname: 'detectrx-ava-client'
     image: "docker.iatric.com/detectrx-ava-client:${IMAGE_TAG}"
     mem_limit: 17179869184
     ports:
       - "3002:3001"
-    depends_on:
-      - "solomon-db"
-      - "detectrx-db"
+    #depends_on:
+     # - "solomon-db"
+     # - "detectrx-db"
     environment:
-      NODE_ENV: ${ENVIRONMENT}
+      NODE_ENV: 'development'
       NODE_TLS_REJECT_UNAUTHORIZED: '0'
       APPLICATION_UUID: 0a3625f8-ae53-4428-866a-928e29bf6327
       APPLICATION_API: https://${HOST_FQDN}:3002/api
@@ -251,35 +279,47 @@ services:
       X_AUTH_TOKEN_EXPIRATION: '15'
       X_AUTH_REFRESH_TOKEN_SECRET: ${TOKEN_SECRET}
       X_AUTH_RERESH_TOKEN_EXPIRATION: '480'
-      SOLOMON_DB_DIALECT: mysql
-      SOLOMON_DB_HOSTNAME: solomon_${ENVIRONMENT}_db
+      SOLOMON_DB_DIALECT: 'mysql'
+      SOLOMON_DB_HOSTNAME: 'solomon-db'
       SOLOMON_DB_LOGGING: 'false'
-      SOLOMON_DB_NAME: solomon_${ENVIRONMENT}
-      SOLOMON_DB_PASSWORD: ${MYSQL_PASSWORD}
+      SOLOMON_DB_NAME: 'solomon'
+      SOLOMON_DB_PASSWORD: ${MYSQL_SOLOMON_DB_PASSWORD}
       SOLOMON_DB_PORT: '3306'
       SOLOMON_DB_USERNAME: 'root'
       PRODUCT_DB_DIALECT: 'mysql'
-      PRODUCT_DB_HOSTNAME: detectrx_${ENVIRONMENT}_db
+      PRODUCT_DB_HOSTNAME: 'detectrx-db'
       PRODUCT_DB_LOGGING: 'false'
-      PRODUCT_DB_NAME: detectrx_${ENVIRONMENT}
-      PRODUCT_DB_PASSWORD: ${MYSQL_PASSWORD}
+      PRODUCT_DB_NAME: 'detectrx'
+      PRODUCT_DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       PRODUCT_DB_PORT: '3306'
       PRODUCT_DB_USERNAME: 'root'
       PRODUCT_PLATFORM: 'drug_div'
-    restart: always
-    hostname: ava_${ENVIRONMENT}
+    restart: 'always'
     networks:
       - "detectrx-subnet-local"
     volumes:
       - "/home/fastlane/certificates:/app/certificates"
+    depends_on:
+      solomon-db:
+        condition: service_healthy
+      detectrx-db:
+        condition: service_healthy
+      fastlane:
+        condition: service_healthy
+    healthcheck:
+      #test: "curl -f fastlane:44400/api"
+      test: ["CMD", "nc", "-z", "-v", "localhost", "3001"]
+      interval: 60s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
   # --------------------------------------------------------------------------------------------
   fastlane:
-    container_name: fastlane_${ENVIRONMENT}
+    container_name: 'fastlane'
+    hostname: 'fastlane'
     image: "docker.iatric.com/fastlane:v2.1.3-alpine"
     ports:
       - "44400:44400"
-    depends_on:
-      - "detectrx-fastlane-db"
     environment:
         APPLICATION_UUID: ef38f527-7e47-a978-cd4c51789a52
         APPLICATION_NAME: Fastlane
@@ -294,12 +334,12 @@ services:
         PORT: 44400
         PFX_PASSPHRASE: ewtNeRa2rDhpPNDLr8DNrmG7bQugvkb5
         NODE_TLS_REJECT_UNAUTHORIZED: 0
-        DB_USERNAME: root
-        DB_PASSWORD: ${MYSQL_PASSWORD}
-        DB_NAME: fastlane_${ENVIRONMENT}
-        DB_HOSTNAME: detectrx-fastlane_${ENVIRONMENT}_db
-        DB_PORT: 3306
-        DB_DIALECT: mysql
+        DB_USERNAME: 'root'
+        DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+        DB_NAME: 'fastlane'
+        DB_HOSTNAME: 'detectrx-fastlane-db'
+        DB_PORT: '3306'
+        DB_DIALECT: 'mysql'
         DB_LOGGING: 0
         X_AUTH_TOKEN_SECRET: ${TOKEN_SECRET}
         X_AUTH_TOKEN_EXPIRATION: 15
@@ -307,22 +347,31 @@ services:
         X_AUTH_REFRESH_TOKEN_EXPIRATION: 480
         ICONNECT_SITECODE: ${SITE_CODE}
     restart: "always"
-    hostname: "fastlane"
     volumes:
       - "/home/fastlane/certificates:/app/certificates"
+    depends_on:
+      solomon-db:
+        condition: service_healthy
     networks:
       - "detectrx-subnet-local"
+    healthcheck:
+      #test: "curl -f fastlane:44400/api"
+      test: ["CMD", "nc", "-z", "-v", "localhost", "44400"]
+      interval: 60s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
   # --------------------------------------------------------------------------------------------
   detectrx-fastlane-db:
-    container_name: detectrx-fastlane_${ENVIRONMENT}
+    container_name: 'detectrx-fastlane-db'
+    hostname: detectrx-fastlane-db
     image: "docker.iatric.com/detectrx-fastlane-db:${IMAGE_TAG}"
     environment:
         TZ: UTC
-        MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+        MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
         MYSQL_TCP_PORT: 3306
     volumes:
       - "detectrx-fastlane-db:/var/lib/mysql"
-    hostname: detectrx-fastlane_${ENVIRONMENT}_db
     ports:
       - "3326:3306"
     logging:
@@ -330,6 +379,12 @@ services:
     restart: "always"
     networks:
       - "detectrx-subnet-local"
+    healthcheck:
+      test: ["CMD-SHELL", 'mysql --database=fastlane --password=${MYSQL_ROOT_PASSWORD} --execute="SELECT count(table_name) > 0 FROM information_schema.tables;" --skip-column-names -B']
+      interval: 60s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
 
 # **********************************************************************************************
 networks:
@@ -359,7 +414,5 @@ volumes:
     external: false
   detectrx-db:
     external: false
-    name: detectrx_${ENVIRONMENT}_db
   detectrx-fastlane-db:
     external: false
-    name: detectrx_fastlane_${ENVIRONMENT}_db
