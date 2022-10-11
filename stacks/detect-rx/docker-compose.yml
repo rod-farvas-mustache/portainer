@@ -184,6 +184,8 @@ services:
     image: "docker.iatric.com/detectrx-nginx:${IMAGE_TAG}"
     ports:
       - "3443:443"
+    volumes:
+      - "/home/fastlane/certificates::/etc/nginx/ssl/"
     restart: "always"
     depends_on:
       - "metabase"
@@ -252,6 +254,7 @@ services:
     restart: "always"
     volumes:
       - "dataloadfiles-local:/mnt/dataloadfiles" # We want to be able to look at the solomon-drug-div import errors and ddhold files
+      - "/home/fastlane/certificates:/app/certificates"
     networks:
       - "detectrx-subnet-local"
     depends_on:
