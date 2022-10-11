@@ -185,7 +185,7 @@ services:
     ports:
       - "3443:443"
     volumes:
-      - "/home/fastlane/certificates::/etc/nginx/ssl/"
+      - "/home/fastlane/certificates:/etc/nginx/ssl/"
     restart: "always"
     depends_on:
       - "metabase"
