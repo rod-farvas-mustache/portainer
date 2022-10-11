@@ -184,8 +184,9 @@ services:
     image: "docker.iatric.com/detectrx-nginx:${IMAGE_TAG}"
     ports:
       - "3443:443"
-    #volumes:
-    #  - "/home/fastlane/certificates:/etc/nginx/ssl/"
+    volumes:
+      - "/home/fastlane/certificates:/etc/nginx/ssl/"
+      - "/home/nginx/conf.d:/etc/nginx/conf.d/"
     restart: "always"
     depends_on:
       - "metabase"
