@@ -231,6 +231,7 @@ services:
     mem_limit: 17179869184
     ports:
       - "3001:3001"
+      - "443:3001"
     environment:
         NODE_ENV: 'development'
         NODE_TLS_REJECT_UNAUTHORIZED: '0'
