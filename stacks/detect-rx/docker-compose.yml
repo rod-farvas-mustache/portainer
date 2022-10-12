@@ -187,7 +187,7 @@ services:
       - "3443:443"
     volumes:
       - "/home/fastlane/certificates:/etc/nginx/ssl/"
-    #  - "/home/nginx/conf.d:/etc/nginx/conf.d/"
+      - "/home/nginx/conf.d:/etc/nginx/conf.d/:ro"
     restart: "always"
     depends_on:
       - "metabase"
