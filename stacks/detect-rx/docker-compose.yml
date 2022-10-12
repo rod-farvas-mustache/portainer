@@ -181,8 +181,8 @@ services:
   detectrx-nginx:
     container_name: 'detectrx-nginx'
     hostname: 'detectrx-nginx'
-    #image: "docker.iatric.com/detectrx-nginx:${IMAGE_TAG}"
-    image: "jamie_nginx:${IMAGE_TAG}"
+    image: "docker.iatric.com/detectrx-nginx:${IMAGE_TAG}"
+    #image: "jamie_nginx:${IMAGE_TAG}"
     ports:
       - "3443:443"
     volumes:
