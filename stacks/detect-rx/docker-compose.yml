@@ -182,12 +182,10 @@ services:
     container_name: 'detectrx-nginx'
     hostname: 'detectrx-nginx'
     image: "docker.iatric.com/detectrx-nginx:${IMAGE_TAG}"
-    #image: "jamie_nginx:${IMAGE_TAG}"
     ports:
       - "3443:443"
     volumes:
       - "/home/fastlane/certificates:/etc/nginx/ssl/"
-      - "/home/nginx/conf.d:/etc/nginx/conf.d/:ro"
     restart: "always"
     depends_on:
       - "metabase"
