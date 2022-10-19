@@ -2,25 +2,6 @@ version: '3.7'
 
 services:
 
-  db:
-    container_name: lms_${ENVIRONMENT}_db
-    hostname: lms_${ENVIRONMENT}_db
-    image: mysql/mysql-server:8.0
-    restart: always
-    command: --default-authentication-plugin=mysql_native_password --lower-case-table-names=1 --innodb-buffer-pool-size=1073741824 --innodb-log-file-size=268435456 --innodb-flush-log-at-trx-commit=0 --innodb-flush-method=O_DIRECT
-    environment:
-      MYSQL_ROOT_HOST: '%'
-      MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_DATABASE: lms_${ENVIRONMENT}
-    ports:
-      - 3306/tcp
-    networks:
-      - iatric
-    volumes:
-      - db_volume:/var/lib/mysql
-
   app:
     container_name: lms_${ENVIRONMENT}
     hostname: lms_${ENVIRONMENT}
@@ -57,10 +38,6 @@ services:
       X_AUTH_REFRESH_TOKEN_SECRET: ${TOKEN_SECRET}
       X_AUTH_TOKEN_EXPIRATION: 15
       X_AUTH_TOKEN_SECRET: ${TOKEN_SECRET}
-
-volumes:
-  db_volume:
-    name: lms_${ENVIRONMENT}_db
 
 networks:
   iatric:
