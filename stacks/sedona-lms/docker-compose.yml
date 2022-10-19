@@ -26,7 +26,45 @@ services:
       DB_DIALECT: mysql
       DB_HOSTNAME: ${MYSQL_HOST}
       DB_LOGGING: 0
-      DB_NAME: ${MYSQL_DATABASE}
+      DB_NAME: lms_${ENVIRONMENT}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      DB_PORT: 3306
+      DB_USERNAME: ${MYSQL_USER}
+      ICONNECT_SITECODE: ${SITE_CODE}
+      NODE_ENV: production
+      NODE_TLS_REJECT_UNAUTHORIZED: 0
+      PORT: 443
+      X_AUTH_REFRESH_TOKEN_EXPIRATION: 480
+      X_AUTH_REFRESH_TOKEN_SECRET: ${TOKEN_SECRET}
+      X_AUTH_TOKEN_EXPIRATION: 15
+      X_AUTH_TOKEN_SECRET: ${TOKEN_SECRET}
+      
+  app:
+    container_name: fastlane_${ENVIRONMENT}
+    hostname: fastlane_${ENVIRONMENT}
+    networks:
+      - iatric
+    image: docker.iatric.com/fastlane:${VERSION}-alpine
+    restart: unless-stopped
+    depends_on:
+      - db
+    ports:
+      - ${APP_PORT}:443/tcp
+    volumes:
+      - /home/iatric/certificates:/app/certificates
+      - /home/iatric/apps/fastlane_${ENVIRONMENT}/uploads:/app/uploads
+    environment:
+      APPLICATION_API: https://fastlane_${ENVIRONMENT}/api
+      APPLICATION_API_CLIENT: https://${SERVER_HOSTNAME}:${APP_PORT}/api
+      APPLICATION_NAME: Fastlane [${ENVIRONMENT}]
+      APPLICATION_URL: https://${SERVER_HOSTNAME}:${APP_PORT}/
+      APPLICATION_UUID: ef38f527-7e47-4680-a978-cd4c51789a52
+      APPLICATIONMANAGER_API: https://fastlane_${ENVIRONMENT}/api
+      APPLICATIONMANAGER_API_CLIENT: https://${SERVER_HOSTNAME}:${FASTLANE_PORT}/api
+      DB_DIALECT: mysql
+      DB_HOSTNAME: fastlane_${ENVIRONMENT}_db
+      DB_LOGGING: 0
+      DB_NAME: fastlane_${ENVIRONMENT}
       DB_PASSWORD: ${MYSQL_PASSWORD}
       DB_PORT: 3306
       DB_USERNAME: ${MYSQL_USER}
