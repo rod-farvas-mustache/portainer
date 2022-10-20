@@ -1,0 +1,68 @@
+version: '3.7'
+
+services:
+
+  db:
+    container_name: fastlane_${ENVIRONMENT}_db
+    hostname: fastlane_${ENVIRONMENT}_db
+    image: mysql/mysql-server:8.0
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password --lower-case-table-names=1 --innodb-buffer-pool-size=1073741824 --innodb-log-file-size=268435456 --innodb-flush-log-at-trx-commit=0 --innodb-flush-method=O_DIRECT
+    environment:
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: fastlane_${ENVIRONMENT}
+    ports:
+      - 3306/tcp
+    networks:
+      - iatric
+    volumes:
+      - db_volume:/var/lib/mysql
+
+  app:
+    container_name: fastlane_${ENVIRONMENT}
+    hostname: fastlane_${ENVIRONMENT}
+    networks:
+      - iatric
+    image: docker.iatric.com/fastlane:${VERSION}-alpine
+    restart: unless-stopped
+    depends_on:
+      - db
+    ports:
+      - ${APP_PORT}:443/tcp
+    volumes:
+      - /home/iatric/certificates:/app/certificates
+      - /home/iatric/apps/fastlane_${ENVIRONMENT}/uploads:/app/uploads
+    environment:
+      APPLICATION_API: https://fastlane_${ENVIRONMENT}/api
+      APPLICATION_API_CLIENT: https://${SERVER_HOSTNAME}:${APP_PORT}/api
+      APPLICATION_NAME: Fastlane [${ENVIRONMENT}]
+      APPLICATION_URL: https://${SERVER_HOSTNAME}:${APP_PORT}/
+      APPLICATION_UUID: ef38f527-7e47-4680-a978-cd4c51789a52
+      APPLICATIONMANAGER_API: https://fastlane_${ENVIRONMENT}/api
+      APPLICATIONMANAGER_API_CLIENT: https://${SERVER_HOSTNAME}:${FASTLANE_PORT}/api
+      DB_DIALECT: mysql
+      DB_HOSTNAME: fastlane_${ENVIRONMENT}_db
+      DB_LOGGING: 0
+      DB_NAME: fastlane_${ENVIRONMENT}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      DB_PORT: 3306
+      DB_USERNAME: ${MYSQL_USER}
+      ICONNECT_SITECODE: ${SITE_CODE}
+      NODE_ENV: production
+      NODE_TLS_REJECT_UNAUTHORIZED: 0
+      PORT: 443
+      X_AUTH_REFRESH_TOKEN_EXPIRATION: 480
+      X_AUTH_REFRESH_TOKEN_SECRET: ${TOKEN_SECRET}
+      X_AUTH_TOKEN_EXPIRATION: 15
+      X_AUTH_TOKEN_SECRET: ${TOKEN_SECRET}
+
+volumes:
+  db_volume:
+    name: fastlane_${ENVIRONMENT}_db
+
+networks:
+  iatric:
+    external: true
