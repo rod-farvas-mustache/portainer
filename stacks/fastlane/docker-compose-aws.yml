@@ -25,7 +25,7 @@ services:
       APPLICATIONMANAGER_API: https://fastlane_${ENVIRONMENT}/api
       APPLICATIONMANAGER_API_CLIENT: https://${SERVER_HOSTNAME}:${FASTLANE_PORT}/api
       DB_DIALECT: mysql
-      DB_HOSTNAME: fastlane_${ENVIRONMENT}_db
+      DB_HOSTNAME: ${MYSQL_HOST}
       DB_LOGGING: 0
       DB_NAME: fastlane_${ENVIRONMENT}
       DB_PASSWORD: ${MYSQL_PASSWORD}
