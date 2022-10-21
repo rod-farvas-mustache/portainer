@@ -9,8 +9,6 @@ services:
       - iatric
     image: docker.iatric.com/fastlane:${VERSION}-alpine
     restart: unless-stopped
-    depends_on:
-      - db
     ports:
       - ${APP_PORT}:443/tcp
     volumes:
