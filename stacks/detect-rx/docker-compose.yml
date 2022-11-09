@@ -157,7 +157,7 @@ services:
     image: "docker.iatric.com/detectrx-sftp:1.1"
     command:
       - "/entrypoint"
-      - "drug_div_test:${SFTP_PASSWORD}:1001"
+      - "drug_div_upload:${SFTP_PASSWORD}:1001"
     environment:
       - "TZ=UTC"
       - "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
