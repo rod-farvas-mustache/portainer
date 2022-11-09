@@ -316,8 +316,6 @@ services:
     volumes:
       - "/home/fastlane/certificates:/app/certificates"
     depends_on:
-      solomon-db:
-        condition: service_healthy
       detectrx-db:
         condition: service_healthy
       fastlane:
@@ -366,7 +364,7 @@ services:
     volumes:
       - "/home/fastlane/certificates:/app/certificates"
     depends_on:
-      solomon-db:
+      detectrx-fastlane-db:
         condition: service_healthy
     networks:
       - "detectrx-subnet-local"
