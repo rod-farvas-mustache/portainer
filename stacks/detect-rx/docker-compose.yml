@@ -331,7 +331,7 @@ services:
   fastlane:
     container_name: 'fastlane'
     hostname: 'fastlane'
-    image: 'docker.iatric.com/fastlane:v2.1.2-alpine'
+    image: 'docker.iatric.com/fastlane:v2.1.3-alpine'
     ports:
       - "44400:44400"
     environment:
