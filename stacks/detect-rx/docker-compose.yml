@@ -154,7 +154,7 @@ services:
   detectrx-sftp:
     container_name: 'sftp-host'
     hostname: 'sftp-host'
-    image: 'docker.iatric.com/detectrx-sftp:latest'
+    image: 'docker.iatric.com/detectrx-sftp:1.1'
     command:
       - "/entrypoint"
       - "drug_div_upload:${SFTP_PASSWORD}:1001"
