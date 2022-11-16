@@ -79,7 +79,7 @@ services:
   detectrx-solomon:
     container_name: 'detectrx-solomon'
     hostname: 'solomon-drug-div'
-    image: "docker.iatric.com/solomon-drug-div:1.0.1""
+    image: 'docker.iatric.com/solomon-drug-div:1.0.1'
     mem_limit: 17179869184
     environment:
         TZ: 'UTC'
@@ -154,7 +154,7 @@ services:
   detectrx-sftp:
     container_name: 'sftp-host'
     hostname: 'sftp-host'
-    image: "docker.iatric.com/detectrx-sftp:latest"
+    image: 'docker.iatric.com/detectrx-sftp:latest'
     command:
       - "/entrypoint"
       - "drug_div_upload:${SFTP_PASSWORD}:1001"
@@ -181,7 +181,7 @@ services:
   detectrx-nginx:
     container_name: 'detectrx-nginx'
     hostname: 'detectrx-nginx'
-    image: "docker.iatric.com/detectrx-nginx:latest"
+    image: 'docker.iatric.com/detectrx-nginx:latest'
     ports:
       - "3443:443"
     volumes:
@@ -205,7 +205,7 @@ services:
   metabase:
     container_name: 'metabase'
     hostname: 'metabase'
-    image: "registry.hub.docker.com/metabase/metabase:v0.41.7"
+    image: 'registry.hub.docker.com/metabase/metabase:v0.41.7'
     environment:
       - "MD_DB_FILE=/home/metabase/metabase.db"
     ports:
@@ -225,7 +225,7 @@ services:
   detectrx-client:
     container_name: 'detectrx-client'
     hostname: 'detectrx-client'
-    image: "docker.iatric.com/detectrx:1.0.1-alpine"
+    image: 'docker.iatric.com/detectrx:1.0.1-alpine'
     dns:
       - 192.168.0.9
     mem_limit: 17179869184
@@ -273,13 +273,15 @@ services:
   detectrx-ava-client:
     container_name: 'detectrx-ava-client'
     hostname: 'detectrx-ava-client'
-    image: "docker.iatric.com/solomon-ava-client:1.0.1-alpine"
+    image: 'docker.iatric.com/solomon-ava-client:1.0.1-alpine'
     mem_limit: 17179869184
     ports:
       - "3002:3001"
-    #depends_on:
-     # - "solomon-db"
-     # - "detectrx-db"
+    depends_on:
+      solomon-db:
+        condition: service_healthy
+      detectrx-db:
+        condition: service_healthy
     environment:
       NODE_ENV: 'development'
       NODE_TLS_REJECT_UNAUTHORIZED: '0'
@@ -329,7 +331,7 @@ services:
   fastlane:
     container_name: 'fastlane'
     hostname: 'fastlane'
-    image: "docker.iatric.com/fastlane:v2.1.2-alpine"
+    image: 'docker.iatric.com/fastlane:v2.1.2-alpine'
     ports:
       - "44400:44400"
     environment:
@@ -377,7 +379,7 @@ services:
   detectrx-fastlane-db:
     container_name: 'detectrx-fastlane-db'
     hostname: detectrx-fastlane-db
-    image: "docker.iatric.com/detectrx-fastlane-db:latest"
+    image: 'docker.iatric.com/detectrx-fastlane-db:latest'
     environment:
         TZ: UTC
         MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
