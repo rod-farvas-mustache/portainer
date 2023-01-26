@@ -6,7 +6,7 @@ services:
   detectrx-db:
     container_name: 'detectrx-db'
     hostname: 'detectrx-db'
-    image: 'docker.iatric.com/detectrx-db:latest'
+    image: 'docker.iatric.com/detectrx-db:1.0.2.1'
     environment:
       TZ: 'UTC'
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -79,7 +79,7 @@ services:
   detectrx-solomon:
     container_name: 'detectrx-solomon'
     hostname: 'solomon-drug-div'
-    image: 'docker.iatric.com/solomon-drug-div:1.0.1'
+    image: 'docker.iatric.com/solomon-drug-div:1.0.2.1'
     mem_limit: 17179869184
     environment:
         TZ: 'UTC'
@@ -118,6 +118,7 @@ services:
         PYTHONPATH: '/usr/lib/spark-3.0.1-bin-hadoop2.7/python/lib/py4j-0.10.4-src.zip:/usr/lib/spark-3.0.1-bin-hadoop2.7/python:/usr/lib/spark-3.0.1-bin-hadoop2.7/python/build:'
         JAVA_HOME: '/usr/lib/jvm/java-1.8.0-openjdk-amd64'
         PRODUCTION: 
+	  - SFTP_USERNAME: detectrx
         SFTP_PASSWORD: ${SFTP_PASSWORD}
         DRUG_DIV_DB_PORT: '3306'
         SCRIPT_INSIDE_DOCKER: '1'
@@ -154,7 +155,7 @@ services:
   detectrx-sftp:
     container_name: 'sftp-host'
     hostname: 'sftp-host'
-    image: 'docker.iatric.com/detectrx-sftp:1.1'
+    image: 'docker.iatric.com/detectrx-sftp:1.0.2.1'
     command:
       - "/entrypoint"
       - "detectrx:${SFTP_PASSWORD}:1001"
@@ -181,7 +182,7 @@ services:
   detectrx-nginx:
     container_name: 'detectrx-nginx'
     hostname: 'detectrx-nginx'
-    image: 'docker.iatric.com/detectrx-nginx:latest'
+    image: 'docker.iatric.com/detectrx-nginx:1.0.2.1'
     ports:
       - "3443:443"
     volumes:
@@ -225,7 +226,7 @@ services:
   detectrx-client:
     container_name: 'detectrx-client'
     hostname: 'detectrx-client'
-    image: 'docker.iatric.com/detectrx:1.0.1-alpine'
+    image: 'docker.iatric.com/detectrx-client:1.0.2.1'
     dns:
       - 192.168.0.9
     mem_limit: 17179869184
@@ -273,7 +274,7 @@ services:
   detectrx-ava-client:
     container_name: 'detectrx-ava-client'
     hostname: 'detectrx-ava-client'
-    image: 'docker.iatric.com/solomon-ava-client:1.0.1-alpine'
+    image: 'docker.iatric.com/detectrx-ava-client:1.0.2.1'
     mem_limit: 17179869184
     ports:
       - "3002:3001"
@@ -379,7 +380,7 @@ services:
   detectrx-fastlane-db:
     container_name: 'detectrx-fastlane-db'
     hostname: detectrx-fastlane-db
-    image: 'docker.iatric.com/detectrx-fastlane-db:latest'
+    image: 'docker.iatric.com/detectrx-fastlane-db:1.0.2.1'
     environment:
         TZ: UTC
         MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
